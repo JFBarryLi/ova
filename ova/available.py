@@ -43,5 +43,6 @@ def get_next_available(location='Ottawa City Hall', dose=1):
 
 
 if __name__ == "__main__":
-    next_avail = get_next_available()
-    log.info(next_avail)
+    for loc in locations:
+        next_avail = get_next_available(location=loc)
+        log.info(next_avail)
