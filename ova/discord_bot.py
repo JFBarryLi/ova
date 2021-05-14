@@ -27,12 +27,13 @@ next_available = {}
 
 
 def format_message(msg):
-    msg = f'> Location: `{msg["location"]}`, Next Available Date: `{msg["next_available"]}`\n'
+    msg = f'> Location: `{msg["location"]}`\n' 
+    msg += f'> Next Available Date: `{msg["next_available"]}`\n'
     msg += '> Book at: https://vaccine.covaxonbooking.ca/manage'
     return msg
 
 
-@loop(seconds=60*10)
+@loop(seconds=60*5)
 async def get_next_available_date():
     log.info('Getting next available date.')
 
