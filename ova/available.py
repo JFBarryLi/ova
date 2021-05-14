@@ -38,7 +38,7 @@ def get_next_available(location='Ottawa City Hall', dose=1):
         log.error(f'Failed to fetch availabe dates for: {location}. Error: {e}.')
 
     for avail in response_json['availability']:
-        if avail['available']:
+        if avail['available'] and avail['date'] != date.today().isoformat():
             return {'location': location, 'next_available': avail['date']}
 
 
