@@ -27,10 +27,11 @@ next_available = {}
 
 
 def format_message(msg):
-    msg = f'> Location: `{msg["location"]}`\n' 
-    msg += f'> Next Available Date: `{msg["next_available"]}`\n'
-    msg += '> Book at: https://vaccine.covaxonbooking.ca/manage'
-    return msg
+    log.info('Formatting msg.')
+    message = f'> Location: `{msg["location"]}`\n' 
+    message += f'> Next Available Date: `{msg["next_available"]}`\n'
+    message += '> Book at: https://vaccine.covaxonbooking.ca/manage'
+    return message
 
 
 @loop(seconds=60*5)
@@ -42,6 +43,7 @@ async def get_next_available_date():
     channel = client.get_channel(int(OTTAWA_CHANNEL))
 
     for loc in locations:
+        log.info(f'Fetching dates for: {loc}.')
         new_available = get_next_available(location=loc)
         if new_available is None:
             continue
