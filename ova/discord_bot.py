@@ -28,10 +28,11 @@ next_available = {}
 
 def format_message(msg):
     msg = f'> Location: `{msg["location"]}`, Next Available Date: `{msg["next_available"]}`\n'
-    msg += 'Book at: https://vaccine.covaxonbooking.ca/manage'
+    msg += '> Book at: https://vaccine.covaxonbooking.ca/manage'
+    return msg
 
 
-@loop(seconds=15)
+@loop(seconds=60*10)
 async def get_next_available_date():
     log.info('Getting next available date.')
 
@@ -48,13 +49,17 @@ async def get_next_available_date():
         if loc in next_available:
             if new_available['next_available'] != next_available[loc]:
                 try:
-                    await channel.send(format_message(new_available))
+                    formatted_message = format_message(new_available)
+                    if formatted_message is not None:
+                        await channel.send(formatted_message)
                     next_available[loc] = new_available['next_available']
                 except Exception as e:
                     log.error(f'Failed to send message. Error: {e}.')
         else:
             try:
-                await channel.send(format_message(new_available))
+                formatted_message = format_message(new_available)
+                if formatted_message is not None:
+                    await channel.send(formatted_message)
                 next_available[loc] = new_available['next_available']
             except Exception as e:
                 log.error(f'Failed to send message. Error: {e}.')
