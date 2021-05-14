@@ -20,4 +20,11 @@ repos:
     rev: '3.7.9'
     hooks:
     -   id: flake8
-
+-   repo: https://github.com/pycqa/pylint
+    rev: v2.8.2
+    hooks:
+    -   id: pylint
+        args:
+        - --output-format=colorized
+        - --disable=C0116 # Docstring for function
+        - --disable=C0114 # Docstring for module
