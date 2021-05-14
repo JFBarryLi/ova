@@ -4,8 +4,11 @@ from datetime import date, timedelta
 import json
 
 import requests
+import pkg_resources
 
-with open('locations.json') as f:
+LOCATIONS = pkg_resources.resource_filename('ova', 'locations.json')
+
+with open(LOCATIONS) as f:
     locations = json.load(f)
 
 
