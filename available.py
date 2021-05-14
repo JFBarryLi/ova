@@ -5,12 +5,11 @@ import json
 
 import requests
 
-LOCATIONS = {
-    'ott-city-hall': 'a0h4t0000006QtbAAE'
-}
+with open('locations.json') as f:
+    locations = json.load(f)
 
 
-def get_next_available(location=LOCATIONS['ott-city-hall']):
+def get_next_available(location=locations['Ottawa City Hall'], dose=1):
     url = f'https://api.covaxonbooking.ca/public/locations/{location}/availability'
 
     headers = {'content-type': 'application/json;charset=UTF-8'}
@@ -19,7 +18,7 @@ def get_next_available(location=LOCATIONS['ott-city-hall']):
         'startDate': date.today().isoformat(),
         'endDate': (date.today() + timedelta(days=30)).isoformat(),
         'vaccineData': 'WyJhMWQ0dDAwMDAwMDFqZGtBQUEiXQ==',
-        'doseNumber': 1,
+        'doseNumber': dose,
         'url': 'https://vaccine.covaxonbooking.ca/manage/appointment-select'
     }
 
