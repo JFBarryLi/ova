@@ -1,42 +1,70 @@
 #!/usr/bin/env python3
 
 import os
+import json
+import logging
+import pkg_resources
 
-import aiohttp
 import discord
 from discord.ext.tasks import loop
 
 from available import get_next_available
 
+log = logging.getLogger(__name__)
+
+LOCATIONS = pkg_resources.resource_filename('ova', 'locations.json')
+
+with open(LOCATIONS) as f:
+    locations = json.load(f)
+
+
 TOKEN = os.environ['DISCORD_TOKEN']
-CHANNEL = os.environ['DISCORD_CHANNEL_ID']
+OTTAWA_CHANNEL = os.environ['DISCORD_OTTAWA_CHANNEL_ID']
 
 client = discord.Client()
 
-next_available_date = ''
+next_available = {}
+
+
+def format_message(msg):
+    msg = f'> Location: `{msg["location"]}`, Next Available Date: `{msg["next_available"]}`\n'
+    msg += 'Book at: https://vaccine.covaxonbooking.ca/manage'
 
 
 @loop(seconds=15)
 async def get_next_available_date():
-    global next_available_date
+    log.info('Getting next available date.')
 
     await client.wait_until_ready()
 
-    channel = client.get_channel(int(CHANNEL))
+    channel = client.get_channel(int(OTTAWA_CHANNEL))
 
-    new_available_date = get_next_available()
-    print(new_available_date)
-    if new_available_date != next_available_date:
-        await channel.send(new_available_date)
-        next_available_date = new_available_date
+    for loc in locations:
+        new_available = get_next_available(location=loc)
+        if new_available is None:
+            continue
+
+        log.info(new_available)
+        if loc in next_available:
+            if new_available['next_available'] != next_available[loc]:
+                try:
+                    await channel.send(format_message(new_available))
+                    next_available[loc] = new_available['next_available']
+                except Exception as e:
+                    log.error(f'Failed to send message. Error: {e}.')
+        else:
+            try:
+                await channel.send(format_message(new_available))
+                next_available[loc] = new_available['next_available']
+            except Exception as e:
+                log.error(f'Failed to send message. Error: {e}.')
 
 
 @client.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('------------')
+    log.info('Logged in as')
+    log.info(client.user.name)
+    log.info(client.user.id)
 
 
 get_next_available_date.start()
