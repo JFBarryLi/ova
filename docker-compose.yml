@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  ova:
+    container_name: on-vax-alert
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_GENERAL_CHANNEL_ID=${DISCORD_GENERAL_CHANNEL_ID}
+      - DISCORD_OTTAWA_CHANNEL_ID=${DISCORD_OTTAWA_CHANNEL_ID}
+    restart: unless-stopped
