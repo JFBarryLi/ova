@@ -5,8 +5,8 @@ import json
 import logging
 import pkg_resources
 
-import discord
 from discord.ext.tasks import loop
+from discord.ext import commands
 
 from available import get_next_available
 
@@ -21,14 +21,35 @@ with open(LOCATIONS) as f:
 TOKEN = os.environ['DISCORD_TOKEN']
 OTTAWA_CHANNEL = os.environ['DISCORD_OTTAWA_CHANNEL_ID']
 
-client = discord.Client()
+bot = commands.Bot(command_prefix='$')
 
 next_available = {}
 
 
+@bot.command(
+    help='Get next available booking dates.'
+)
+async def get_next(ctx):
+    log.info('Getting next available date.')
+    for loc in locations:
+        log.info(f'Fetching dates for : {loc}.')
+        new_available = get_next_available(location=loc)
+        if new_available is None:
+            continue
+
+        log.info(new_available)
+        try:
+            formatted_message = format_message(new_available)
+            if formatted_message is not None:
+                await ctx.send(formatted_message)
+            next_available[loc] = new_available['next_available']
+        except Exception as e:
+            log.error(f'Failed to send message. Error: {e}.')
+
+
 def format_message(msg):
     log.info('Formatting msg.')
-    message = f'> Location: `{msg["location"]}`\n' 
+    message = f'> Location: `{msg["location"]}`\n'
     message += f'> Next Available Date: `{msg["next_available"]}`\n'
     message += '> Book at: https://vaccine.covaxonbooking.ca/manage'
     return message
@@ -38,9 +59,9 @@ def format_message(msg):
 async def get_next_available_date():
     log.info('Getting next available date.')
 
-    await client.wait_until_ready()
+    await bot.wait_until_ready()
 
-    channel = client.get_channel(int(OTTAWA_CHANNEL))
+    channel = bot.get_channel(int(OTTAWA_CHANNEL))
 
     for loc in locations:
         log.info(f'Fetching dates for: {loc}.')
@@ -68,13 +89,13 @@ async def get_next_available_date():
                 log.error(f'Failed to send message. Error: {e}.')
 
 
-@client.event
+@bot.event
 async def on_ready():
     log.info('Logged in as')
-    log.info(client.user.name)
-    log.info(client.user.id)
+    log.info(bot.user.name)
+    log.info(bot.user.id)
 
 
 get_next_available_date.start()
 
-client.run(TOKEN)
+bot.run(TOKEN)
