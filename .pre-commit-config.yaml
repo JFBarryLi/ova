@@ -28,3 +28,4 @@ repos:
         - --output-format=colorized
         - --disable=C0116 # Docstring for function
         - --disable=C0114 # Docstring for module
+        - --disable=E0401 # Import error
