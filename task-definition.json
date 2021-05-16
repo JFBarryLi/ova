@@ -12,7 +12,7 @@
           "/usr/bin/dumb-init", "--"
         ],
         "command": [
-          "/ova/ientrypoint.sh"
+          "/ova/entrypoint.sh"
         ],
         "cpu": 128,
         "memory": 128,
