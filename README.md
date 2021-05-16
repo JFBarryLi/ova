@@ -1,3 +1,5 @@
+![CI](https://github.com/JFBarryLi/ova/actions/workflows/ci.yml/badge.svg)
+
 # Ontario Vaccine Alert
 
 OVA is a Discord bot that polls vaccine.covaxonbooking.ca looking for vaccine booking availability.

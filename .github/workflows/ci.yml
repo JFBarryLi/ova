@@ -1,0 +1,72 @@
+on:
+  push:
+    branches:
+      - main
+
+name: Deploy to Amazon ECS
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ova-bot
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: ova-bot
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Fill in task definition variables
+      id: task-def-substitution
+      env:
+        TASK_DEF: ${{ steps.task-def.outputs.task-definition }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWSLOGS_GROUP_NAME: ${{ secrets.AWSLOGS_GROUP_NAME }}
+        TASK_ROLE_ARN: ${{ secrets.TASK_ROLE_ARN }}
+        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        DISCORD_GENERAL_CHANNEL_ID: ${{ secrets.DISCORD_GENERAL_CHANNEL_ID }}
+        DISCORD_OTTAWA_CHANNEL_ID: ${{ secrets.DISCORD_OTTAWA_CHANNEL_ID }}
+      run: |
+        sed -i "s|{{AWS_REGION}}|${AWS_REGION}|g" ${TASK_DEF}
+        sed -i "s|{{AWSLOGS_GROUP_NAME}}|${AWSLOGS_GROUP_NAME}|g" ${TASK_DEF}
+        sed -i "s|{{TASK_ROLE_ARN}}|${TASK_ROLE_ARN}|g" ${TASK_DEF}
+        sed -i "s|{{DISCORD_TOKEN}}|${DISCORD_TOKEN}|g" ${TASK_DEF}
+        sed -i "s|{{DISCORD_GENERAL_CHANNEL_ID}}|${DISCORD_GENERAL_CHANNEL_ID}|g" ${TASK_DEF}
+        sed -i "s|{{DISCORD_OTTAWA_CHANNEL_ID}}|${DISCORD_OTTAWA_CHANNEL_ID}|g" ${TASK_DEF}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ova-bot
+        cluster: prod-backend-services
+        wait-for-service-stability: true
