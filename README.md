@@ -27,6 +27,15 @@ docker-compose up --build
 
 ## Usage
 
+#### Bot commands on discord:
+
+```bash
+$help
+$get_next
+$pause
+$start
+```
+
 Use this to retrieve next available dates locally:
 
 ```bash

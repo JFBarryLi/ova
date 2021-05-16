@@ -55,6 +55,22 @@ def format_message(msg):
     return message
 
 
+@bot.command(
+    help='Pause the alerting.'
+)
+async def pause(ctx):
+    log.info(f'Pausing alerting due to request from: {ctx.author}.')
+    get_next_available_date.cancel()
+
+
+@bot.command(
+    help='Starting alerts.'
+)
+async def start(ctx):
+    log.info(f'Starting alerts due to request from: {ctx.author}.')
+    get_next_available_date.start()
+
+
 @loop(seconds=60*5)
 async def get_next_available_date():
     log.info('Getting next available date.')
