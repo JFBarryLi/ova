@@ -1,0 +1,53 @@
+{
+    "requiresCompatibilities": [],
+    "inferenceAccelerators": [],
+    "containerDefinitions": [
+      {
+        "entryPoint": [
+          "sh",
+          "-c"
+        ],
+        "portMappings": [],
+        "entryPoint": [
+          "/usr/bin/dumb-init", "--"
+        ],
+        "command": [
+          "/ova/ientrypoint.sh"
+        ],
+        "cpu": 128,
+        "memory": 128,
+        "name": "ova-bot",
+        "essential": true,
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "{{AWSLOGS_GROUP_NAME}}",
+            "awslogs-region": "{{AWS_REGION}}",
+            "awslogs-stream-prefix": "ova-bot"
+          }
+        },
+        "environment": [
+          {
+            "name": "DISCORD_TOKEN",
+            "value": "{{DISCORD_TOKEN}}"
+          },
+          {
+            "name": "DISCORD_GENERAL_CHANNEL_ID",
+            "value": "{{DISCORD_GENERAL_CHANNEL_ID}}"
+          },
+          {
+            "name": "DISCORD_OTTAWA_CHANNEL_ID",
+            "value": "{{DISCORD_OTTAWA_CHANNEL_ID}}"
+          }
+        ]
+      }
+    ],
+    "volumes": [],
+    "memory": "128",
+    "cpu": "128",
+    "executionRoleArn": "",
+    "family": "ova-bot",
+    "networkMode": "bridge",
+    "taskRoleArn": "{{TASK_ROLE_ARN}}",
+    "placementConstraints": []
+}
