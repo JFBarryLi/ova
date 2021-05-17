@@ -58,17 +58,35 @@ def format_message(msg):
 @bot.command(
     help='Pause the alerting.'
 )
+@commands.has_permissions(administrator=True)
 async def pause(ctx):
     log.info(f'Pausing alerting due to request from: {ctx.author}.')
     get_next_available_date.cancel()
 
 
+@pause.error
+async def pause_error(ctx, error):
+    log.warning(error)
+    if isinstance(error, commands.MissingPermissions):
+        log.warning(f'{ctx.author} attempted to use the pause command with insufficient permissions.')
+        await ctx.send('Only admins can use the pause command.')
+
+
 @bot.command(
     help='Starting alerts.'
 )
+@commands.has_permissions(administrator=True)
 async def start(ctx):
     log.info(f'Starting alerts due to request from: {ctx.author}.')
     get_next_available_date.start()
+
+
+@start.error
+async def start_error(ctx, error):
+    log.warning(error)
+    if isinstance(error, commands.MissingPermissions):
+        log.warning(f'{ctx.author} attempted to use the start command with insufficient permissions.')
+        await ctx.send('Only admins can use the start command.')
 
 
 @loop(seconds=60*5)
