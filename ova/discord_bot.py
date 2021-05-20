@@ -89,7 +89,7 @@ async def start_error(ctx, error):
         await ctx.send('Only admins can use the start command.')
 
 
-@loop(seconds=60*5)
+@loop(seconds=60)
 async def get_next_available_date():
     log.info('Getting next available date.')
 
