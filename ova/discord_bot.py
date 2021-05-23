@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import json
 import logging
 import pkg_resources
@@ -132,4 +133,8 @@ async def on_ready():
 
 get_next_available_date.start()
 
-bot.run(TOKEN)
+try:
+    bot.run(TOKEN)
+except Exception as e:
+    log.error(f'Bot error: {e}.')
+    sys.exit()
